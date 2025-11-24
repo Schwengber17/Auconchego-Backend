@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===============================================
+// Definição dos ENUMs
+// ===============================================
+enum Porte {
+  PEQUENO
+  MEDIO
+  GRANDE
+}
+
+enum Sexo {
+  MACHO
+  FEMEA
+}
+
+enum Status {
+  DISPONIVEL
+  ADOTADO
+  RESERVADO
+}
+
+enum StatusAdocao {
+  PENDENTE
+  APROVADA
+  REJEITADA
+  CONCLUIDA
+}
+
+enum TipoLocalizacao {
+  RESGATE
+  TRANSITO
+  ABRIGO
+  OUTRO
+}
+
+// ===============================================
+// Model ONG
+// ===============================================
+model ONG {
+  id       Int    @id @default(autoincrement()) @map("id_ong")
+  cnpj     String @unique
+  endereco String?
+  nome     String
+  telefone String?
+  email    String?
+
+  pets               Pet[]
+  tutores            Tutor[]
+  visitasAcompanhamento VisitaAcompanhamento[]
+
+  @@map("ong")
+}
+
+// ===============================================
+// Model PET
+// ===============================================
+model Pet {
+  id                    Int     @id @default(autoincrement()) @map("id_pet")
+  nome                  String
+  especie               String
+  raca                  String
+  porte                 Porte
+  sexo                  Sexo
+  status                Status  @default(DISPONIVEL)
+  dataResgate           DateTime @map("data_resgate")
+  dataCadastro          DateTime @default(now()) @map("data_cadastro")
+  descricao             String?
+  necessidadesEspeciais Boolean @map("necessidades_especiais")
+  tratamentoContinuo    Boolean @map("tratamento_continuo")
+  doencaCronica         Boolean @map("doenca_cronica")
+  descricaoSaude        String? @map("descricao_saude")
+  
+  idTutorOrigem         Int? @map("id_tutor_origem")
+  tutorOrigem           Tutor? @relation("PetsOrigem", fields: [idTutorOrigem], references: [id])
+
+  idTutorAdotante       Int? @map("id_tutor_adotante")
+  tutorAdotante         Tutor? @relation("PetsAdotados", fields: [idTutorAdotante], references: [id])
+
+  idOng                 Int @map("id_ong")
+  ong                   ONG @relation(fields: [idOng], references: [id])
+
+  historicoLocalizacoes HistoricoLocalizacao[]
+  visitasAcompanhamento VisitaAcompanhamento[]
+  relatorios RelatorioCompatibilidade[]
+
+  @@map("pet")
+}
+
+// ===============================================
+// Model TUTOR
+// ===============================================
+model Tutor {
+  id           Int     @id @default(autoincrement()) @map("id_tutor")
+  nome         String
+  email        String  @unique
+  telefone     String
+  endereco     String
+  cidade       String
+  estado       String
+  cep          String
+  dataCadastro DateTime @default(now()) @map("data_cadastro")
+
+  pets                  Pet[] @relation("PetsOrigem")
+  petsAdotados          Pet[] @relation("PetsAdotados")
+  ong                   ONG @relation(fields: [idOng], references: [id])
+  idOng                 Int @map("id_ong")
+  visitasAcompanhamento VisitaAcompanhamento[]
+
+  @@map("tutor")
+}
+
+// ===============================================
+// Model ADOTANTE
+// ===============================================
+model Adotante {
+  id                       Int     @id @default(autoincrement()) @map("id_adotante")
+  nome                     String
+  email                    String  @unique
+  telefone                 String
+  endereco                 String
+  cidade                   String
+  estado                   String
+  cep                      String
+  dataCadastro             DateTime @default(now()) @map("data_cadastro")
+  
+  especieDesejada          String
+  racaDesejada             String?
+  porteDesejado            String?
+  sexoDesejado             String?
+  
+  aceitaNecessidadesEsp    Boolean @default(false) @map("aceita_necessidades_esp")
+  aceitaTratamentoContinuo Boolean @default(false) @map("aceita_tratamento_continuo")
+  aceitaDoencaCronica      Boolean @default(false) @map("aceita_doenca_cronica")
+  
+  temOutrosAnimais         Boolean @default(false) @map("tem_outros_animais")
+  possuiDisponibilidade    Boolean @default(true) @map("possui_disponibilidade")
+  
+  petBuscado               Int?    @map("pet_buscado")
+  statusBusca              StatusAdocao @default(PENDENTE) @map("status_busca")
+
+  relatorios               RelatorioCompatibilidade[]
+
+  @@map("adotante")
+}
+
+// ===============================================
+// Model HISTÓRICO DE LOCALIZAÇÃO
+// ===============================================
+model HistoricoLocalizacao {
+  id           Int      @id @default(autoincrement()) @map("id_historico")
+  idPet        Int      @map("id_pet")
+  pet          Pet      @relation(fields: [idPet], references: [id], onDelete: Cascade)
+  
+  tipo         TipoLocalizacao
+  local        String
+  descricao    String?
+  dataInicio   DateTime @map("data_inicio")
+  dataFim      DateTime? @map("data_fim")
+  dataCadastro DateTime @default(now()) @map("data_cadastro")
+
+  @@map("historico_localizacao")
+}
+
+// ===============================================
+// Model VISITA ACOMPANHAMENTO
+// ===============================================
+model VisitaAcompanhamento {
+  id           Int      @id @default(autoincrement()) @map("id_visita")
+  idPet        Int      @map("id_pet")
+  pet          Pet      @relation(fields: [idPet], references: [id], onDelete: Cascade)
+  
+  idTutor      Int      @map("id_tutor")
+  tutor        Tutor    @relation(fields: [idTutor], references: [id], onDelete: Cascade)
+  
+  idOng        Int      @map("id_ong")
+  ong          ONG      @relation(fields: [idOng], references: [id], onDelete: Cascade)
+
+  dataVisita   DateTime @map("data_visita")
+  observacoes  String?
+  
+  vacinado     Boolean @default(false)
+  castrado     Boolean @default(false)
+  descricaoSaude String? @map("descricao_saude")
+  
+  dataCadastro DateTime @default(now()) @map("data_cadastro")
+
+  @@map("visita_acompanhamento")
+}
+
+// ===============================================
+// Model RELATÓRIO DE COMPATIBILIDADE
+// ===============================================
+model RelatorioCompatibilidade {
+  id           Int      @id @default(autoincrement()) @map("id_relatorio")
+  idAdotante   Int      @map("id_adotante")
+  adotante     Adotante @relation(fields: [idAdotante], references: [id], onDelete: Cascade)
+  
+  idPet        Int      @map("id_pet")
+  pet          Pet      @relation(fields: [idPet], references: [id], onDelete: Cascade)
+
+  pontuacaoTotal         Int     @map("pontuacao_total")
+  compatibilidade        Float   @default(0.0)
+  
+  pontoEspecie           Int @default(0) @map("ponto_especie")
+  pontoRaca              Int @default(0) @map("ponto_raca")
+  pontoPorte             Int @default(0) @map("ponto_porte")
+  pontoSexo              Int @default(0) @map("ponto_sexo")
+  pontoSaude             Int @default(0) @map("ponto_saude")
+  pontoSocial            Int @default(0) @map("ponto_social")
+  
+  fatorImpeditivo        Boolean @default(false) @map("fator_impeditivo")
+  descricaoImpeditivo    String? @map("descricao_impeditivo")
+  
+  dataCriacaoRelatorio   DateTime @default(now()) @map("data_criacao_relatorio")
+
+  @@map("relatorio_compatibilidade")
+}

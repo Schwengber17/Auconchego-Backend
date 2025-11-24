@@ -1,0 +1,58 @@
+{
+  "name": "auconchego-backend",
+  "version": "1.0.0",
+  "description": "Sistema de cadastramento e adoção de pets com rastreabilidade e compatibilidade",
+  "keywords": [
+    "adoption",
+    "pets",
+    "animals",
+    "compatibility"
+  ],
+  "license": "ISC",
+  "author": "PUCRS - Engenharia de Software",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed-v2.ts",
+    "db:studio": "prisma studio",
+    "dev": "tsx watch src/server.ts",
+    "lint": "eslint src --ext .ts",
+    "start": "node dist/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:api": "tsx scripts/test-api.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "latest",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cors": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "lucide-react": "^0.454.0",
+    "next": "16.0.3",
+    "node-fetch": "^3.3.2",
+    "pg": "^8.16.3",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "tailwind-merge": "^2.5.5",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^22",
+    "@types/react": "19.2.6",
+    "@types/react-dom": "19.2.3",
+    "postcss": "^8.5",
+    "prisma": "^6.16.3",
+    "tailwindcss": "4.1.17",
+    "tsx": "^4.20.6",
+    "typescript": "^5"
+  },
+  "trustedDependencies": [
+    "pg-native"
+  ]
+}
