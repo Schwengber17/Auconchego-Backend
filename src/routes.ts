@@ -6,6 +6,7 @@ import HistoricoLocalizacaoController from "./controllers/HistoricoLocalizacaoCo
 import VisitaAcompanhamentoController from "./controllers/VisitaAcompanhamentoController.js"
 import CompatibilidadeController from "./controllers/CompatibilidadeController.js"
 import RelatorioAcompanhamentoController from "./controllers/RelatorioAcompanhamentoController.js"
+import OngController from "./controllers/OngController.js"
 
 const router = Router()
 
@@ -23,6 +24,7 @@ router.delete("/tutores/:id", TutorController.delete)
 
 router.get("/adotantes", AdotanteController.list)
 router.get("/adotantes/:id", AdotanteController.show)
+router.get('/adotantes/:id/adotados', AdotanteController.adotados)
 router.post("/adotantes", AdotanteController.create)
 router.put("/adotantes/:id", AdotanteController.update)
 router.delete("/adotantes/:id", AdotanteController.delete)
@@ -51,5 +53,15 @@ router.get("/compatibilidade/alto-compatibilidade", CompatibilidadeController.ob
 router.post("/acompanhamento/relatorio", RelatorioAcompanhamentoController.gerarRelatorio)
 router.get("/acompanhamento/tutor/:tutorId", RelatorioAcompanhamentoController.listarPorTutor)
 router.get("/acompanhamento/alertas", RelatorioAcompanhamentoController.obterAlertas)
+
+// ONG routes
+router.get('/ongs', OngController.list)
+router.get('/ongs/:id', OngController.show)
+router.post('/ongs', OngController.create)
+router.put('/ongs/:id', OngController.update)
+router.delete('/ongs/:id', OngController.delete)
+
+// Adoption flow
+router.post('/pets/:id/adopt', PetController.adopt)
 
 export default router

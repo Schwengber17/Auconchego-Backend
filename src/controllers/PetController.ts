@@ -1,10 +1,13 @@
 import type { Request, Response } from 'express';
 import PetService from '../services/PetService.js';
+import AdotanteService from '../services/AdotanteService.js';
+import { ENUM_STATUS_ADOCAO, ENUM_STATUS } from '../utils/constants.js'
 
 class PetController {
     async list(req: Request, res: Response) {
         try {
-            const pets = await PetService.getAll();
+            const status = (req.query.status as string) || undefined
+            const pets = await PetService.getAll(status ? { status } : undefined);
             return res.status(200).json(pets);
         } catch (error) {
             console.error(error);
@@ -34,7 +37,11 @@ class PetController {
             return res.status(201).json(newPet);
         } catch (error) {
             console.error(error);
-            // Pode ser um erro de FK (idOng não existe), por exemplo.
+            // Distinguish missing ONG (foreign key) to give clearer message
+            if ((error as any).message === 'ONG_NOT_FOUND') {
+                return res.status(400).json({ error: 'ONG not found. Please provide a valid idOng.' });
+            }
+            // Pode ser outro erro de FK ou validação
             return res.status(400).json({ error: 'Failed to create pet. Check your input data.' });
         }
     }
@@ -67,6 +74,29 @@ class PetController {
         } catch (error) {
             console.error(error);
             return res.status(404).json({ error: 'Pet not found.' });
+        }
+    }
+
+    async adopt(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            if (!id) return res.status(400).json({ error: 'Missing id parameter' });
+            const idNum = parseInt(id, 10);
+            if (Number.isNaN(idNum)) return res.status(400).json({ error: 'Invalid id parameter' });
+
+            const { idAdotante } = req.body as { idAdotante?: number }
+
+            // ensure adotante exists if provided
+            if (typeof idAdotante !== 'undefined') {
+                const adot = await AdotanteService.getById(Number(idAdotante))
+                if (!adot) return res.status(400).json({ error: 'Adotante not found' })
+            }
+
+            const adopted = await PetService.adopt(idNum, idAdotante ? Number(idAdotante) : undefined)
+            return res.status(200).json(adopted)
+        } catch (error) {
+            console.error(error)
+            return res.status(400).json({ error: 'Failed to adopt pet' })
         }
     }
 }

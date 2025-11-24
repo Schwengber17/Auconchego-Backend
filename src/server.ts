@@ -10,7 +10,9 @@ const PORT = process.env.PORT || 3333
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "*",
+    // Allow any origin. Using `origin: true` causes the server to reflect
+    // the request's Origin header which works together with `credentials: true`.
+    origin: true,
     credentials: true,
   }),
 )

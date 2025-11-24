@@ -4,9 +4,17 @@ import type { IPetCreate, IPetUpdate } from '../interfaces/Pet.js';
 const prisma = new PrismaClient();
 
 class PetService {
+  async getAll(filter?: { status?: string }) {
+        const where: any = {}
+        if (filter && filter.status) {
+            where.status = filter.status
+        } else {
+            // Default to only available pets for public listing
+            where.status = 'DISPONIVEL'
+        }
 
-  async getAll() {
         const pets = await prisma.pet.findMany({
+            where,
             include: {
                 ong: {
                     select: {
@@ -37,10 +45,21 @@ class PetService {
             dataResgate: (petData as any).dataResgate ?? new Date(),
         }
 
+        // If idOng provided, ensure the ONG exists to avoid FK errors
+        if ((data as any).idOng) {
+            const idOng = (data as any).idOng as number
+            // Use a raw query to avoid depending on generated model casing
+            const found: any = await prisma.$queryRaw`SELECT id_ong FROM ong WHERE id_ong = ${idOng}`
+            if (!found || (Array.isArray(found) && found.length === 0)) {
+                const e: any = new Error('ONG_NOT_FOUND')
+                throw e
+            }
+        }
+
         const newPet = await prisma.pet.create({
             data,
-        });
-        return newPet;
+        })
+        return newPet
     }
 
     async update(id: number, petData: IPetUpdate) {
@@ -49,6 +68,32 @@ class PetService {
             data: petData,
         });
         return updatedPet;
+    }
+
+    /**
+     * Mark a pet as adopted. Optionally associate the adopted pet with an adotante
+     * by setting `adotante.petBuscado` and `adotante.statusBusca`.
+     */
+    async adopt(id: number, idAdotante?: number) {
+        // ensure pet exists and is available
+        const pet = await prisma.pet.findUnique({ where: { id } })
+        if (!pet) throw new Error('Pet not found')
+        if (pet.status !== 'DISPONIVEL') throw new Error('Pet not available for adoption')
+
+        // Build transaction actions
+        const actions: any[] = []
+
+        actions.push(prisma.pet.update({ where: { id }, data: { status: 'ADOTADO' } }))
+
+        if (typeof idAdotante !== 'undefined') {
+            actions.push(prisma.adotante.update({ where: { id: idAdotante }, data: { petBuscado: id, statusBusca: 'CONCLUIDA' } }))
+        }
+
+        const results = await prisma.$transaction(actions)
+
+        // Return the updated pet (first result)
+        const updatedPet = await prisma.pet.findUnique({ where: { id }, include: { ong: true } })
+        return updatedPet
     }
 
     async delete(id: number) {
