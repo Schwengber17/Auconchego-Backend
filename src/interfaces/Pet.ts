@@ -16,6 +16,19 @@ export interface IPetCreate {
     doencaCronica: boolean;
     idOng: number;
     imagens?: string[];
+
+    // NOVOS CAMPOS
+    idade?: number;
+    peso?: number;
+    local?: string;
+    vacinado?: boolean;
+    castrado?: boolean;
+    temperamento?: string[];
+    descricao?: string;
+    descricaoSaude?: string;
+    dataResgate?: Date | string;
+    idTutorOrigem?: number;
+    idTutorAdotante?: number;
 }
 
 // Interface para a atualização de um Pet. Todos os campos são opcionais.
@@ -31,4 +44,17 @@ export interface IPetUpdate {
     doencaCronica?: boolean;
     idOng?: number;
     imagens?: string[];
+
+    // NOVOS CAMPOS
+    idade?: number;
+    peso?: number;
+    local?: string;
+    vacinado?: boolean;
+    castrado?: boolean;
+    temperamento?: string[];
+    descricao?: string;
+    descricaoSaude?: string;
+    dataResgate?: Date | string;
+    idTutorOrigem?: number;
+    idTutorAdotante?: number;
 }

@@ -30,51 +30,51 @@ AuConchego é uma plataforma desenvolvida como projeto acadêmico para gerenciar
 
 ### 1. Clone o repositório
 
-\`\`\`bash
+```bash
 git clone <repository-url>
 cd auconchego-backend
-\`\`\`
+```
 
 ### 2. Instale as dependências
 
-\`\`\`bash
+```bash
 npm install
-\`\`\`
+```
 
 ### 3. Configure variáveis de ambiente
 
 Crie um arquivo `.env` na raiz do projeto:
 
-\`\`\`env
+```env
 DATABASE_URL="postgresql://user:password@localhost:5432/auconchego"
 PORT=3333
 CORS_ORIGIN="http://localhost:3000"
 NODE_ENV="development"
-\`\`\`
+```
 
 ### 4. Execute as migrations
 
-\`\`\`bash
+```bash
 npx prisma migrate deploy
-\`\`\`
+```
 
 ### 5. Execute o seed (opcional)
 
-\`\`\`bash
+```bash
 npx prisma db seed
-\`\`\`
+```
 
 ### 6. Inicie o servidor
 
-\`\`\`bash
+```bash
 npm run dev
-\`\`\`
+```
 
 O servidor estará disponível em `http://localhost:3333`
 
 ## Estrutura de Diretórios
 
-\`\`\`
+```
 src/
 ├── controllers/          # Controllers dos endpoints
 ├── services/            # Lógica de negócio
@@ -87,14 +87,14 @@ src/
 prisma/
 ├── schema.prisma        # Schema do banco
 └── migrations/          # Migrações do banco
-\`\`\`
+```
 
 ## Documentação da API
 
 ### Base URL
-\`\`\`
+```
 http://localhost:3333/api
-\`\`\`
+```
 
 ### Autenticação
 Atualmente, a API não requer autenticação. Implementação de JWT pode ser adicionada futuramente.
@@ -106,14 +106,14 @@ Atualmente, a API não requer autenticação. Implementação de JWT pode ser ad
 ### PETS
 
 #### Listar todos os pets
-\`\`\`http
+```http
 GET /api/pets
-\`\`\`
+```
 
 Retorna lista de todos os pets cadastrados.
 
 **Response:**
-\`\`\`json
+```json
 [
   {
     "id": 1,
@@ -129,17 +129,17 @@ Retorna lista de todos os pets cadastrados.
     "ong": { "id": 1, "cnpj": "12.345.678/0001-90" }
   }
 ]
-\`\`\`
+```
 
 #### Obter pet por ID
-\`\`\`http
+```http
 GET /api/pets/:id
-\`\`\`
+```
 
 **Response:** Objeto pet com dados completos incluindo ONG.
 
 #### Criar novo pet
-\`\`\`http
+```http
 POST /api/pets
 Content-Type: application/json
 
@@ -157,10 +157,10 @@ Content-Type: application/json
   "descricaoSaude": "Saudável",
   "idOng": 1
 }
-\`\`\`
+```
 
 #### Atualizar pet
-\`\`\`http
+```http
 PUT /api/pets/:id
 Content-Type: application/json
 
@@ -168,29 +168,29 @@ Content-Type: application/json
   "status": "ADOTADO",
   "idTutorAdotante": 1
 }
-\`\`\`
+```
 
 #### Deletar pet
-\`\`\`http
+```http
 DELETE /api/pets/:id
-\`\`\`
+```
 
 ---
 
 ### TUTORES
 
 #### Listar tutores
-\`\`\`http
+```http
 GET /api/tutores
-\`\`\`
+```
 
 #### Obter tutor por ID
-\`\`\`http
+```http
 GET /api/tutores/:id
-\`\`\`
+```
 
 #### Criar tutor
-\`\`\`http
+```http
 POST /api/tutores
 Content-Type: application/json
 
@@ -204,10 +204,10 @@ Content-Type: application/json
   "cep": "90000-000",
   "idOng": 1
 }
-\`\`\`
+```
 
 #### Atualizar tutor
-\`\`\`http
+```http
 PUT /api/tutores/:id
 Content-Type: application/json
 
@@ -215,29 +215,29 @@ Content-Type: application/json
   "telefone": "(51) 99999-0002",
   "endereco": "Rua Nova, 456"
 }
-\`\`\`
+```
 
 #### Deletar tutor
-\`\`\`http
+```http
 DELETE /api/tutores/:id
-\`\`\`
+```
 
 ---
 
 ### ADOTANTES
 
 #### Listar adotantes
-\`\`\`http
+```http
 GET /api/adotantes
-\`\`\`
+```
 
 #### Obter adotante por ID
-\`\`\`http
+```http
 GET /api/adotantes/:id
-\`\`\`
+```
 
 #### Criar adotante
-\`\`\`http
+```http
 POST /api/adotantes
 Content-Type: application/json
 
@@ -259,39 +259,39 @@ Content-Type: application/json
   "temOutrosAnimais": false,
   "possuiDisponibilidade": true
 }
-\`\`\`
+```
 
 #### Atualizar adotante
-\`\`\`http
+```http
 PUT /api/adotantes/:id
-\`\`\`
+```
 
 #### Deletar adotante
-\`\`\`http
+```http
 DELETE /api/adotantes/:id
-\`\`\`
+```
 
 ---
 
 ### HISTÓRICO DE LOCALIZAÇÃO
 
 #### Listar histórico
-\`\`\`http
+```http
 GET /api/historico-localizacao
-\`\`\`
+```
 
 #### Obter histórico por ID
-\`\`\`http
+```http
 GET /api/historico-localizacao/:id
-\`\`\`
+```
 
 #### Obter histórico de um pet
-\`\`\`http
+```http
 GET /api/historico-localizacao/pet/:petId
-\`\`\`
+```
 
 #### Registrar nova localização
-\`\`\`http
+```http
 POST /api/historico-localizacao
 Content-Type: application/json
 
@@ -303,46 +303,46 @@ Content-Type: application/json
   "dataInicio": "2025-11-01T10:00:00Z",
   "dataFim": "2025-11-05T14:00:00Z"
 }
-\`\`\`
+```
 
 **Tipos de localização**: `RESGATE`, `TRANSITO`, `ABRIGO`, `OUTRO`
 
 #### Atualizar histórico
-\`\`\`http
+```http
 PUT /api/historico-localizacao/:id
-\`\`\`
+```
 
 #### Deletar histórico
-\`\`\`http
+```http
 DELETE /api/historico-localizacao/:id
-\`\`\`
+```
 
 ---
 
 ### VISITAS DE ACOMPANHAMENTO (Pós-Adoção)
 
 #### Listar visitas
-\`\`\`http
+```http
 GET /api/visitas-acompanhamento
-\`\`\`
+```
 
 #### Obter visita por ID
-\`\`\`http
+```http
 GET /api/visitas-acompanhamento/:id
-\`\`\`
+```
 
 #### Visitas de um pet
-\`\`\`http
+```http
 GET /api/visitas-acompanhamento/pet/:petId
-\`\`\`
+```
 
 #### Visitas de um tutor adotante
-\`\`\`http
+```http
 GET /api/visitas-acompanhamento/tutor/:tutorId
-\`\`\`
+```
 
 #### Registrar visita
-\`\`\`http
+```http
 POST /api/visitas-acompanhamento
 Content-Type: application/json
 
@@ -356,24 +356,24 @@ Content-Type: application/json
   "castrado": false,
   "descricaoSaude": "Saúde excelente, sem problemas"
 }
-\`\`\`
+```
 
 #### Atualizar visita
-\`\`\`http
+```http
 PUT /api/visitas-acompanhamento/:id
-\`\`\`
+```
 
 #### Deletar visita
-\`\`\`http
+```http
 DELETE /api/visitas-acompanhamento/:id
-\`\`\`
+```
 
 ---
 
 ### COMPATIBILIDADE E BUSCA "QUERO ADOTAR"
 
 #### Calcular compatibilidade
-\`\`\`http
+```http
 POST /api/compatibilidade/calcular
 Content-Type: application/json
 
@@ -381,10 +381,10 @@ Content-Type: application/json
   "idAdotante": 1,
   "idPet": 1
 }
-\`\`\`
+```
 
 **Response:**
-\`\`\`json
+```json
 {
   "id": 1,
   "idAdotante": 1,
@@ -401,31 +401,31 @@ Content-Type: application/json
   "descricaoImpeditivo": null,
   "dataCriacaoRelatorio": "2025-11-23T15:30:00Z"
 }
-\`\`\`
+```
 
 #### Buscar pets compatíveis para adotante
-\`\`\`http
+```http
 GET /api/compatibilidade/adotante/:idAdotante/pets
-\`\`\`
+```
 
 Retorna ranking de pets disponíveis ordenados por compatibilidade (maior para menor).
 
 #### Buscar adotantes compatíveis para pet
-\`\`\`http
+```http
 GET /api/compatibilidade/pet/:idPet/adotantes
-\`\`\`
+```
 
 Retorna ranking de adotantes ordenados por compatibilidade.
 
 #### Listar relatórios de compatibilidade
-\`\`\`http
+```http
 GET /api/compatibilidade/relatorios
-\`\`\`
+```
 
 #### Obter matches com alta compatibilidade
-\`\`\`http
+```http
 GET /api/compatibilidade/alto-compatibilidade?minScore=70
-\`\`\`
+```
 
 Query parameters:
 - `minScore` (default: 60) - Pontuação mínima de compatibilidade
@@ -435,7 +435,7 @@ Query parameters:
 ### ACOMPANHAMENTO PÓS-ADOÇÃO
 
 #### Gerar relatório de acompanhamento
-\`\`\`http
+```http
 POST /api/acompanhamento/relatorio
 Content-Type: application/json
 
@@ -444,10 +444,10 @@ Content-Type: application/json
   "idTutor": 1,
   "dataAdocao": "2025-11-10T00:00:00Z"
 }
-\`\`\`
+```
 
 **Response:**
-\`\`\`json
+```json
 {
   "idPet": 1,
   "idTutor": 1,
@@ -462,19 +462,19 @@ Content-Type: application/json
   "observacoesGerais": "Pet está adaptando-se bem ao novo lar.",
   "statusAcompanhamento": "ACOMPANHANDO"
 }
-\`\`\`
+```
 
 **statusAcompanhamento**: `ACOMPANHANDO`, `CONCLUIDO` (após 6 meses), `PROBLEMATICO`
 
 #### Listar acompanhamentos por tutor
-\`\`\`http
+```http
 GET /api/acompanhamento/tutor/:tutorId
-\`\`\`
+```
 
 #### Obter alertas de pets sem visitas
-\`\`\`http
+```http
 GET /api/acompanhamento/alertas?dias=30
-\`\`\`
+```
 
 Query parameters:
 - `dias` (default: 30) - Número de dias sem visitas para alertar
@@ -511,7 +511,7 @@ A compatibilidade é calculada usando a seguinte metodologia:
 
 ## Scripts Disponíveis
 
-\`\`\`bash
+```bash
 # Desenvolvimento
 npm run dev          # Inicia servidor com hot reload
 
@@ -526,7 +526,7 @@ npx prisma studio           # Abre Prisma Studio (UI)
 
 # Validação
 npm run lint         # ESLint (se configurado)
-\`\`\`
+```
 
 ---
 
@@ -534,13 +534,13 @@ npm run lint         # ESLint (se configurado)
 
 A API retorna erros estruturados:
 
-\`\`\`json
+```json
 {
   "error": "Descrição do erro",
   "timestamp": "2025-11-23T15:30:00.000Z",
   "path": "/api/pets/999"
 }
-\`\`\`
+```
 
 ### Códigos de Status HTTP
 
