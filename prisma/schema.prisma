@@ -77,6 +77,7 @@ model Pet {
   tratamentoContinuo    Boolean @map("tratamento_continuo")
   doencaCronica         Boolean @map("doenca_cronica")
   descricaoSaude        String? @map("descricao_saude")
+  imagens               String[] @default([])
   
   idTutorOrigem         Int? @map("id_tutor_origem")
   tutorOrigem           Tutor? @relation("PetsOrigem", fields: [idTutorOrigem], references: [id])

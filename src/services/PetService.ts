@@ -20,7 +20,15 @@ class PetService {
                     select: {
                         id: true,
                         cnpj: true,
+                        nome: true,
+                        endereco: true,
                     }
+                },
+                historicoLocalizacoes: {
+                    orderBy: {
+                        dataInicio: 'desc'
+                    },
+                    take: 1
                 }
             }
         });
@@ -31,7 +39,13 @@ class PetService {
         const pet = await prisma.pet.findUnique({
             where: { id },
              include: {
-                ong: true 
+                ong: true,
+                historicoLocalizacoes: {
+                    orderBy: {
+                        dataInicio: 'desc'
+                    },
+                    take: 1
+                }
             }
         });
         return pet;

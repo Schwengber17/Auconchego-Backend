@@ -15,6 +15,7 @@ export interface IPetCreate {
     tratamentoContinuo: boolean;
     doencaCronica: boolean;
     idOng: number;
+    imagens?: string[];
 }
 
 // Interface para a atualização de um Pet. Todos os campos são opcionais.
@@ -29,4 +30,5 @@ export interface IPetUpdate {
     tratamentoContinuo?: boolean;
     doencaCronica?: boolean;
     idOng?: number;
+    imagens?: string[];
 }

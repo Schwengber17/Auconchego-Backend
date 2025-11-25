@@ -67,6 +67,8 @@ async function main() {
 
   // Criar Pets
   console.log("Criando pets disponíveis...")
+  // URL da imagem padrão - será servida pelo backend em /public
+  const imagemPadrao = "http://localhost:3333/public/14-racas-de-cachorro-para-familias-com-criancas.jpg"
   const pet1 = await prisma.pet.create({
     data: {
       nome: "Max",
@@ -84,7 +86,8 @@ async function main() {
       descricaoSaude: "Excelente saúde, todas as vacinações em dia",
       idOng: ong1.id,
       idTutorOrigem: tutor1.id,
-    },
+      imagens: [imagemPadrao],
+    }as any,
   })
 
   const pet2 = await prisma.pet.create({
@@ -104,7 +107,8 @@ async function main() {
       descricaoSaude: "Saudável e bem vacinada",
       idOng: ong2.id,
       idTutorOrigem: tutor2.id,
-    },
+      imagens: [imagemPadrao],
+    }as any,
   })
 
   const pet3 = await prisma.pet.create({
@@ -124,7 +128,8 @@ async function main() {
       descricaoSaude: "Requer medicação diária para controle de dermatite",
       idOng: ong1.id,
       idTutorOrigem: tutor1.id,
-    },
+      imagens: [imagemPadrao],
+    }as any,
   })
 
   // Criar Histórico de Localização
