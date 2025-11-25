@@ -54,10 +54,16 @@ class PetService {
     // Registrar novo animal
     async create(petData: IPetCreate) {
         // Ensure required date fields exist to match Prisma schema
-        const data = {
-            ...petData,
-            dataResgate: (petData as any).dataResgate ?? new Date(),
-        }
+            const data = {
+                ...petData,
+                dataResgate: (petData as any).dataResgate ?? new Date(),
+                // Provide defaults for required boolean fields in Prisma schema
+                necessidadesEspeciais: (petData as any).necessidadesEspeciais ?? false,
+                tratamentoContinuo: (petData as any).tratamentoContinuo ?? false,
+                doencaCronica: (petData as any).doencaCronica ?? false,
+                vacinado: (petData as any).vacinado ?? false,
+                castrado: (petData as any).castrado ?? false,
+            }
 
         // If idOng provided, ensure the ONG exists to avoid FK errors
         if ((data as any).idOng) {

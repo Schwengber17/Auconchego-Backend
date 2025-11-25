@@ -1,41 +1,41 @@
-version: '3.8'
-
 services:
-  postgres:
+  db:
     image: postgres:15
-    container_name: auconchego_postgres
+    container_name: auconchego_db
     environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
       POSTGRES_DB: auconchego
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d auconchego"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d auconchego"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  backend:
-    build: .
-    container_name: auconchego_backend
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+      - /app/node_modules
     ports:
       - "3333:3333"
-    environment:
-      DATABASE_URL: postgresql://user:password@postgres:5432/auconchego
-      PORT: 3333
-      CORS_ORIGIN: http://localhost:3000
-      NODE_ENV: development
     depends_on:
-      postgres:
-        condition: service_healthy
-    volumes:
-      - .:/app
-      - /app/node_modules
-    command: sh -c "npx prisma migrate deploy && npx prisma db seed && npm run dev"
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:12345@db:5432/auconchego
+      PORT: 3333
+      NODE_ENV: development
+      CORS_ORIGIN: http://localhost:3000
+    command: sh -c "npx prisma generate && npx prisma db push && npm run dev"
     working_dir: /app
 
 volumes:
-  postgres_data:
+  db_data:

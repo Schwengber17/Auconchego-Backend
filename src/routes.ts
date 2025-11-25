@@ -64,4 +64,11 @@ router.delete('/ongs/:id', OngController.delete)
 // Adoption flow
 router.post('/pets/:id/adopt', PetController.adopt)
 
+// Adoption requests (no auth yet) - front will simulate roles
+router.post('/pets/:id/adoption-requests', (await import('./controllers/AdoptionRequestController.js')).default.create)
+router.get('/adoption-requests', (await import('./controllers/AdoptionRequestController.js')).default.list)
+router.get('/adoption-requests/:id', (await import('./controllers/AdoptionRequestController.js')).default.show)
+router.put('/adoption-requests/:id/approve', (await import('./controllers/AdoptionRequestController.js')).default.approve)
+router.put('/adoption-requests/:id/reject', (await import('./controllers/AdoptionRequestController.js')).default.reject)
+
 export default router
