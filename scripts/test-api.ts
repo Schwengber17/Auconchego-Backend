@@ -12,7 +12,7 @@ interface TestResult {
 
 const results: TestResult[] = []
 
-async function test(endpoint: string, method = "GET", body?: unknown): Promise<void> {
+async function test(endpoint: string, method = "GET", body?: unknown): Promise<any> {
   try {
     const url = `${BASE_URL}${endpoint}`
     const options: any = {
@@ -30,8 +30,9 @@ async function test(endpoint: string, method = "GET", body?: unknown): Promise<v
     const statusOk = response.ok || response.status === 400 || response.status === 404
 
     let message = ""
+    let data: any = null
     try {
-      const data = (await response.json()) as unknown
+      data = (await response.json()) as unknown
       message = JSON.stringify(data).substring(0, 100)
     } catch {
       message = response.statusText
@@ -46,6 +47,7 @@ async function test(endpoint: string, method = "GET", body?: unknown): Promise<v
     })
 
     console.log(`${statusOk ? "✓" : "✗"} ${method} ${endpoint} - ${response.status}`)
+    return data
   } catch (error) {
     results.push({
       endpoint,
@@ -55,6 +57,7 @@ async function test(endpoint: string, method = "GET", body?: unknown): Promise<v
       message: (error as Error).message,
     })
     console.log(`✗ ${method} ${endpoint} - Error: ${(error as Error).message}`)
+    return null
   }
 }
 
@@ -80,19 +83,20 @@ async function runTests() {
   console.log("\n--- Testando Tutores ---")
   await test("/tutores", "GET")
   await test("/tutores/1", "GET")
-  await test("/tutores", "POST", {
+  const tutorCreated = await test("/tutores", "POST", {
     nome: "João Silva",
     email: "joao@example.com",
     telefone: "11999999999",
     endereco: "Rua A, 123",
     cep: "01310100",
   })
+  const tutorId = tutorCreated?.id ?? 1
 
   // Adotantes
   console.log("\n--- Testando Adotantes ---")
   await test("/adotantes", "GET")
   await test("/adotantes/1", "GET")
-  await test("/adotantes", "POST", {
+  const adotanteCreated = await test("/adotantes", "POST", {
     nome: "Maria Santos",
     email: "maria@example.com",
     telefone: "11988888888",
@@ -105,6 +109,7 @@ async function runTests() {
     sexoDesejado: "FEMEA",
     aceitaNecessidadesEspeciais: true,
   })
+  const adotanteId = adotanteCreated?.id ?? 1
 
   // Histórico de Localização
   console.log("\n--- Testando Histórico de Localização ---")
@@ -133,6 +138,44 @@ async function runTests() {
   // Health Check
   console.log("\n--- Health Check ---")
   await test("http://localhost:3333/health", "GET")
+
+    // Adoption lifecycle: create request -> approve -> check pet
+    console.log("\n--- Testando Fluxo de Adoção ---")
+    const petCreatedForFlow = await test("/pets", "POST", {
+      nome: "Rex-Test",
+      especie: "Cachorro",
+      raca: "SRD",
+      porte: "MEDIO",
+      sexo: "MACHO",
+      dataResgate: new Date().toISOString(),
+      idOng: 1,
+      idTutorOrigem: tutorId,
+    })
+    const petId = petCreatedForFlow?.id ?? 1
+
+    const adoptionRequest = await test(`/pets/${petId}/adoption-requests`, "POST", {
+      idAdotante: adotanteId,
+      message: "Tenho espaço e tempo pra cuidar",
+    })
+
+    await test(`/adoption-requests?petId=${petId}&status=PENDENTE`, "GET")
+
+    const adoptionId = adoptionRequest?.id ?? 1
+    await test(`/adoption-requests/${adoptionId}/approve`, "PUT", {
+      responderId: tutorId,
+      responderType: "TUTOR",
+    })
+
+    const petAfter = await test(`/pets/${petId}`, "GET")
+    const petIsAdopted = petAfter?.status === "ADOTADO"
+    results.push({
+      endpoint: `/pets/${petId} status check`,
+      method: "ASSERT",
+      status: petIsAdopted ? 200 : 500,
+      success: petIsAdopted,
+      message: petIsAdopted ? "Pet marcado como ADOTADO" : "Pet não está ADOTADO",
+    })
+    console.log(`${petIsAdopted ? "✓" : "✗"} Fluxo de adoção - Pet ${petIsAdopted ? "ADOTADO" : "NÃO ADOTADO"}`)
 
   // Summary
   console.log("\n========== RESUMO DOS TESTES ==========")

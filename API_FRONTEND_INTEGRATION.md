@@ -180,6 +180,83 @@ Frontend: para sugestões, chame `/compatibilidade/adotante/:id/pets`. Para comp
 
 ---
 
+## Pedido de Adoção (Adoption Request)
+
+Este fluxo permite que um adotante solicite a adoção de um pet e que o tutor ou a ONG responsável analisem e respondam (aprovar/rejeitar).
+
+- `POST /pets/:id/adoption-requests`
+  - O que faz: cria um pedido de adoção para o pet `:id`.
+  - Body (JSON):
+    ```json
+    { "idAdotante": 1, "message": "Tenho espaço e tempo pra cuidar" }
+    ```
+  - Response: `201` + objeto `AdoptionRequest` (status inicial `PENDENTE`) | `400` validação.
+
+- `GET /adoption-requests?petId=&adotanteId=&status=`
+  - O que faz: lista pedidos filtrando por `petId`, `adotanteId`, `status` (opcional).
+  - Response: `200` + array de pedidos.
+
+- `GET /adoption-requests/:id`
+  - O que faz: retorna detalhe do pedido.
+  - Response: `200` + pedido | `404`.
+
+- `PUT /adoption-requests/:id/approve`
+  - O que faz: aprova o pedido de adoção.
+  - Body (JSON): `{ "responderId": 1, "responderType": "TUTOR" }` onde `responderType` é `TUTOR` ou `ONG`.
+  - Regras de negócio importantes:
+    - O backend valida que o `responderId` pertence ao tutor ou ONG responsável pelo pet.
+    - Em caso de aprovação, o pedido passa para `APROVADA`, o `pet.status` passa para `ADOTADO` e `pet.idTutorAdotante` é setado com o `adotanteId` do pedido.
+    - Outros pedidos `PENDENTE` para o mesmo pet são automaticamente marcados como `REJEITADA`.
+  - Response: `200` + pedido atualizado ou `400`/`403` se não autorizado.
+
+- `PUT /adoption-requests/:id/reject`
+  - O que faz: rejeita o pedido.
+  - Body (JSON): `{ "responderId": 1, "responderType": "ONG", "reason": "Não atende critérios" }` (reason opcional).
+  - Em caso de rejeição, o pedido passa para `REJEITADA`; o pet permanece com `status` atual.
+
+Frontend contract / fluxo recomendado:
+
+- Criação do pedido (Adotante):
+  1. O adotante clica em "Solicitar Adoção" na página do pet.
+  2. Front envia `POST /pets/:id/adoption-requests` com `{ idAdotante, message }`.
+  3. Tratar `201` mostrando confirmação; em `400` mostrar validações.
+
+- Painel do Tutor/ONG (responder pedidos):
+  1. O tutor/ONG lista pedidos pendentes pelos seus pets: obter lista de pets do tutor/ong e para cada pet chamar `GET /adoption-requests?petId=<petId>&status=PENDENTE`, ou o backend pode ser estendido para filtrar por `tutorId`/`ongId`.
+  2. Ao aprovar, o front chama `PUT /adoption-requests/:id/approve` com `{ responderId, responderType }` — **use o id real do tutor ou da ong**.
+  3. Ao rejeitar, chamar `PUT /adoption-requests/:id/reject` com `{ responderId, responderType, reason }`.
+
+Recomendações de UI e UX:
+
+- Mostrar o `message` do adotante e dados de contato quando o tutor/ONG avaliar.
+- Após aprovação, refrescar o detalhe do pet (`GET /pets/:id`) para refletir `status: ADOTADO` e `idTutorAdotante`.
+- Implementar confirmação/aviso antes de aprovar (ação irreversível no fluxo atual).
+
+Exemplo fetch (criar pedido):
+```js
+await fetch(`/api/pets/${petId}/adoption-requests`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ idAdotante: adotanteId, message: 'Tenho experiência com animais' })
+})
+```
+
+Exemplo fetch (aprovar como tutor):
+```js
+await fetch(`/api/adoption-requests/${requestId}/approve`, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ responderId: tutorId, responderType: 'TUTOR' })
+})
+```
+
+Segurança / próximos passos:
+
+- Atualmente a rota aceita `responderId` e `responderType` no body — recomendamos implementar autenticação (JWT) e middleware que extraia o `userId` do token para evitar spoofing.
+- Em produção, registre logs/alertas ao aprovar pedidos e considerar um fluxo de confirmação (ex.: contato telefônico/visita) antes de tornar o pet definitivamente `ADOTADO`.
+
+---
+
 ## 7) Acompanhamento pós-adoção (Relatórios)
 
 - `POST /acompanhamento/relatorio` — gera relatório de acompanhamento.
