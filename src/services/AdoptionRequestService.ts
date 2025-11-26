@@ -9,17 +9,13 @@ class AdoptionRequestService {
     if (!pet) throw new Error("Pet not found")
     if (pet.status !== "DISPONIVEL") throw new Error("Pet not available for adoption")
 
-    // Create request and mark pet as RESERVADO so frontend reflects it's under review
-    const [req] = await prisma.$transaction([
-      prisma.adoptionRequest.create({
-        data: {
-          petId,
-          adotanteId,
-          message,
-        },
-      }),
-      prisma.pet.update({ where: { id: petId }, data: { status: "RESERVADO" } }),
-    ])
+    const req = await prisma.adoptionRequest.create({
+      data: {
+        petId,
+        adotanteId,
+        message,
+      },
+    })
 
     return req
   }
@@ -43,8 +39,7 @@ class AdoptionRequestService {
 
     const pet = await prisma.pet.findUnique({ where: { id: req.petId } })
     if (!pet) throw new Error("Pet not found")
-    // Allow approving when pet is RESERVADO (pending request) or DISPONIVEL, but not if already ADOTADO
-    if (pet.status === "ADOTADO") throw new Error("Pet not available")
+    if (pet.status !== "DISPONIVEL") throw new Error("Pet not available")
 
     // authorization check without auth system: responder must match tutor origin or ong
     if (responderType === "TUTOR") {
@@ -77,16 +72,6 @@ class AdoptionRequestService {
     }
 
     const updated = await prisma.adoptionRequest.update({ where: { id }, data: { status: "REJEITADA", respondedAt: new Date(), responderId, responderType, reason } })
-
-    // If there are no more pending requests for this pet, and the pet is RESERVED, revert to DISPONIVEL
-    const pendingCount = await prisma.adoptionRequest.count({ where: { petId: pet.id, status: "PENDENTE" } })
-    if (pendingCount === 0) {
-      // Only revert if pet hasn't been adopted in the meantime
-      if (pet.status === "RESERVADO") {
-        await prisma.pet.update({ where: { id: pet.id }, data: { status: "DISPONIVEL" } })
-      }
-    }
-
     return updated
   }
 }
