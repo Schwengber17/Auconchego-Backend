@@ -191,6 +191,7 @@ Este fluxo permite que um adotante solicite a adoção de um pet e que o tutor o
     { "idAdotante": 1, "message": "Tenho espaço e tempo pra cuidar" }
     ```
   - Response: `201` + objeto `AdoptionRequest` (status inicial `PENDENTE`) | `400` validação.
+  - Efeito colateral: ao criar o primeiro pedido para um `pet` que está `DISPONIVEL`, o backend marca o `pet.status` como `RESERVADO` para sinalizar que o animal está sob análise. Se todos os pedidos pendentes forem rejeitados, o `pet.status` é revertido para `DISPONIVEL`.
 
 - `GET /adoption-requests?petId=&adotanteId=&status=`
   - O que faz: lista pedidos filtrando por `petId`, `adotanteId`, `status` (opcional).
