@@ -32,6 +32,7 @@
     "dotenv": "latest",
     "express": "latest",
     "lucide-react": "^0.454.0",
+    "multer": "^2.0.2",
     "next": "16.0.3",
     "node-fetch": "^3.3.2",
     "pg": "^8.16.3",
@@ -43,6 +44,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/multer": "^2.0.0",
     "@types/node": "^22",
     "@types/react": "19.2.6",
     "@types/react-dom": "19.2.3",

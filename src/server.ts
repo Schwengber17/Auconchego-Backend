@@ -2,6 +2,7 @@ import "dotenv/config"
 import express from "express"
 import cors from "cors"
 import path from "path"
+import uploadRoutes from './uploadRoutes'
 import { fileURLToPath } from "url"
 import router from "./routes.js"
 import { errorLogger, errorHandler, notFoundHandler } from "./middleware/validation.js"
@@ -33,6 +34,9 @@ app.use(rateLimitMiddleware(1000, 60000)) // 1000 requests per minute
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() })
 })
+
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')))
+app.use('/api/upload', uploadRoutes)
 
 app.get("/", (req, res) => {
   res.status(200).json({
