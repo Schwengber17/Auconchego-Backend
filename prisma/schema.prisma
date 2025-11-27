@@ -146,12 +146,31 @@ model Adotante {
   porteDesejado   String?
   sexoDesejado    String?
 
+  // Preferências de idade e peso
+  idadeMinima Int? @map("idade_minima")
+  idadeMaxima Int? @map("idade_maxima")
+  pesoMinimo  Float? @map("peso_minimo")
+  pesoMaximo  Float? @map("peso_maximo")
+
+  // Preferências de saúde e cuidados
   aceitaNecessidadesEsp    Boolean @default(false) @map("aceita_necessidades_esp")
   aceitaTratamentoContinuo Boolean @default(false) @map("aceita_tratamento_continuo")
   aceitaDoencaCronica      Boolean @default(false) @map("aceita_doenca_cronica")
+  preferVacinado           Boolean? @map("prefer_vacinado")
+  preferCastrado           Boolean? @map("prefer_castrado")
 
+  // Preferências de temperamento (array de strings)
+  preferTemperamento String[] @default([]) @map("prefer_temperamento")
+
+  // Preferências de localização
+  preferLocalizacao String? @map("prefer_localizacao") // cidade ou estado preferido
+
+  // Ambiente e estilo de vida
   temOutrosAnimais      Boolean @default(false) @map("tem_outros_animais")
   possuiDisponibilidade Boolean @default(true) @map("possui_disponibilidade")
+  tipoMoradia          String? @map("tipo_moradia") // "apartamento", "casa", "chacara"
+  tempoCasa            String? @map("tempo_casa") // "baixo", "medio", "alto"
+  experiencia          Boolean? @map("experiencia") // já teve pets antes
 
   petBuscado  Int?         @map("pet_buscado")
   statusBusca StatusAdocao @default(PENDENTE) @map("status_busca")
@@ -220,12 +239,19 @@ model RelatorioCompatibilidade {
   pontuacaoTotal  Int   @map("pontuacao_total")
   compatibilidade Float @default(0.0)
 
-  pontoEspecie Int @default(0) @map("ponto_especie")
-  pontoRaca    Int @default(0) @map("ponto_raca")
-  pontoPorte   Int @default(0) @map("ponto_porte")
-  pontoSexo    Int @default(0) @map("ponto_sexo")
-  pontoSaude   Int @default(0) @map("ponto_saude")
-  pontoSocial  Int @default(0) @map("ponto_social")
+  pontoEspecie      Int @default(0) @map("ponto_especie")
+  pontoRaca         Int @default(0) @map("ponto_raca")
+  pontoPorte        Int @default(0) @map("ponto_porte")
+  pontoSexo         Int @default(0) @map("ponto_sexo")
+  pontoSaude        Int @default(0) @map("ponto_saude")
+  pontoSocial       Int @default(0) @map("ponto_social")
+  pontoIdade        Int @default(0) @map("ponto_idade")
+  pontoPeso         Int @default(0) @map("ponto_peso")
+  pontoVacinacao    Int @default(0) @map("ponto_vacinacao")
+  pontoCastracao    Int @default(0) @map("ponto_castracao")
+  pontoTemperamento Int @default(0) @map("ponto_temperamento")
+  pontoLocalizacao  Int @default(0) @map("ponto_localizacao")
+  pontoAmbiente     Int @default(0) @map("ponto_ambiente")
 
   fatorImpeditivo     Boolean @default(false) @map("fator_impeditivo")
   descricaoImpeditivo String? @map("descricao_impeditivo")
