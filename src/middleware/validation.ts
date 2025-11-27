@@ -21,7 +21,9 @@ export const validateCNPJ = (cnpj: string): boolean => {
 }
 
 export const validateTelefone = (telefone: string): boolean => {
-  const telefoneRegex = /^$$\d{2}$$\s?\d{4,5}-\d{4}$/
+  // Aceita telefone apenas com números (10 ou 11 dígitos)
+  // ou com formato (XX) XXXXX-XXXX ou (XX) XXXX-XXXX
+  const telefoneRegex = /^(\d{10,11}|\(\d{2}\)\s?\d{4,5}-\d{4})$/
   return telefoneRegex.test(telefone)
 }
 

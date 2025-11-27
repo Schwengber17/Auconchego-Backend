@@ -37,12 +37,21 @@ class AdotanteController {
         try {
             const novo = await AdotanteService.create(req.body);
             return res.status(201).json(novo);
-        } catch (error) {
-            console.error(error);
-            // pode ser erro de unicidade (email), FK, etc.
+        } catch (error: any) {
+            console.error('Erro ao criar adotante:', error);
+            
+            // Verifica se é erro de email duplicado
+            if (error?.code === 'P2002' || error?.message?.includes('Unique constraint') || error?.message?.includes('email')) {
+                return res
+                    .status(400)
+                    .json({ error: "Este email já está cadastrado. Use outro email ou faça login." });
+            }
+            
+            // Retorna mensagem de erro mais específica
+            const errorMessage = error?.message || "Erro ao criar adotante. Verifique os dados e tente novamente.";
             return res
                 .status(400)
-                .json({ error: "Failed to create adotante. Check your input data." });
+                .json({ error: errorMessage });
         }
     }
 

@@ -10,6 +10,13 @@ export interface IRelatorioCompatibilidade {
   pontoSexo: number
   pontoSaude: number
   pontoSocial: number
+  pontoIdade: number
+  pontoPeso: number
+  pontoVacinacao: number
+  pontoCastracao: number
+  pontoTemperamento: number
+  pontoLocalizacao: number
+  pontoAmbiente: number
   fatorImpeditivo: boolean
   descricaoImpeditivo?: string
   dataCriacaoRelatorio: Date
@@ -26,6 +33,13 @@ export interface IRelatorioCompatibilidadeCreate {
   pontoSexo?: number
   pontoSaude?: number
   pontoSocial?: number
+  pontoIdade?: number
+  pontoPeso?: number
+  pontoVacinacao?: number
+  pontoCastracao?: number
+  pontoTemperamento?: number
+  pontoLocalizacao?: number
+  pontoAmbiente?: number
   fatorImpeditivo?: boolean
   descricaoImpeditivo?: string
 }
