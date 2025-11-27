@@ -43,7 +43,7 @@ class AdoptionRequestService {
 
     // authorization check without auth system: responder must match tutor origin or ong
     if (responderType === "TUTOR") {
-      if (pet.idTutorOrigem !== responderId) throw new Error("Responder is not the tutor who created the pet")
+      if (pet.tutorId !== responderId) throw new Error("Responder is not the tutor who created the pet")
     } else if (responderType === "ONG") {
       if (pet.idOng !== responderId) throw new Error("Responder is not the ONG of the pet")
     }
@@ -51,7 +51,7 @@ class AdoptionRequestService {
     // perform transaction: approve request, mark pet adopted, reject other pending requests
     await prisma.$transaction([
       prisma.adoptionRequest.update({ where: { id }, data: { status: "APROVADA", respondedAt: new Date(), responderId, responderType } }),
-      prisma.pet.update({ where: { id: pet.id }, data: { status: "ADOTADO", idTutorAdotante: req.adotanteId } }),
+      prisma.pet.update({ where: { id: pet.id }, data: { status: "ADOTADO", adotanteId: req.adotanteId } }),
       prisma.adoptionRequest.updateMany({ where: { petId: pet.id, status: "PENDENTE", id: { not: id } }, data: { status: "REJEITADA", respondedAt: new Date(), reason: "Pet adopted by another request" } }),
     ])
 

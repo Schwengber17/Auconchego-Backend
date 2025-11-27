@@ -55,6 +55,6 @@ export interface IPetUpdate {
     descricao?: string;
     descricaoSaude?: string;
     dataResgate?: Date | string;
-    idTutorOrigem?: number;
-    idTutorAdotante?: number;
+    tutorId?: number;
+    adotanteId?: number;
 }

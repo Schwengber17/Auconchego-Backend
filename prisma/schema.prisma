@@ -87,11 +87,11 @@ model Pet {
   castrado     Boolean  @default(false)
   temperamento String[] @default([])
 
-  idTutorOrigem Int?   @map("id_tutor_origem")
-  tutorOrigem   Tutor? @relation("PetsOrigem", fields: [idTutorOrigem], references: [id])
+  tutorId Int?   @map("id_tutor_origem")
+  tutorOrigem   Tutor? @relation("PetsOrigem", fields: [tutorId], references: [id])
 
-  idTutorAdotante Int?   @map("id_tutor_adotante")
-  tutorAdotante   Tutor? @relation("PetsAdotados", fields: [idTutorAdotante], references: [id])
+  adotanteId Int?   @map("id_tutor_adotante")
+  tutorAdotante   Tutor? @relation("PetsAdotados", fields: [adotanteId], references: [id])
 
   idOng Int @map("id_ong")
   ong   ONG @relation(fields: [idOng], references: [id])
