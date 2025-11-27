@@ -81,6 +81,27 @@ class RelatorioCompatibilidadeService {
   }
 
   async create(data: IRelatorioCompatibilidadeCreate) {
+    // Verifica se já existe um relatório para este adotante e pet
+    const existing = await prisma.relatorioCompatibilidade.findFirst({
+      where: {
+        idAdotante: data.idAdotante,
+        idPet: data.idPet,
+      },
+    })
+
+    if (existing) {
+      // Atualiza o relatório existente
+      return await prisma.relatorioCompatibilidade.update({
+        where: { id: existing.id },
+        data,
+        include: {
+          adotante: true,
+          pet: true,
+        },
+      })
+    }
+
+    // Cria novo relatório
     return await prisma.relatorioCompatibilidade.create({
       data,
       include: {

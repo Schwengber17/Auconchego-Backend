@@ -30,66 +30,69 @@ class CompatibilidadeService {
 
         const components: { value: number; min: number; max: number; key: string }[] = []
 
-        // === ESPÉCIE (20 pontos) ===
+        // === ESPÉCIE (30 pontos) - CRITÉRIO MAIS IMPORTANTE ===
         if (adotante.especieDesejada) {
-            const pontoEspecie = pet.especie === adotante.especieDesejada ? 20 : -20
-            components.push({ value: pontoEspecie, min: -20, max: 20, key: "pontoEspecie" })
+            const pontoEspecie = pet.especie === adotante.especieDesejada ? 30 : -30
+            components.push({ value: pontoEspecie, min: -30, max: 30, key: "pontoEspecie" })
         } else {
             components.push({ value: 0, min: 0, max: 0, key: "pontoEspecie" })
         }
 
-        // === RAÇA (10 pontos) ===
+        // === RAÇA (15 pontos) ===
         if (adotante.racaDesejada) {
-            const pontoRaca = pet.raca === adotante.racaDesejada ? 10 : -5
-            components.push({ value: pontoRaca, min: -5, max: 10, key: "pontoRaca" })
+            const pontoRaca = pet.raca === adotante.racaDesejada ? 15 : -8
+            components.push({ value: pontoRaca, min: -8, max: 15, key: "pontoRaca" })
         } else {
             components.push({ value: 0, min: 0, max: 0, key: "pontoRaca" })
         }
 
-        // === PORTE (10 pontos) ===
+        // === PORTE (15 pontos) ===
         if (adotante.porteDesejado) {
-            const pontoPorte = pet.porte === adotante.porteDesejado ? 10 : -5
-            components.push({ value: pontoPorte, min: -5, max: 10, key: "pontoPorte" })
+            const pontoPorte = pet.porte === adotante.porteDesejado ? 15 : -10
+            components.push({ value: pontoPorte, min: -10, max: 15, key: "pontoPorte" })
         } else {
             components.push({ value: 0, min: 0, max: 0, key: "pontoPorte" })
         }
 
-        // === SEXO (5 pontos) ===
+        // === SEXO (8 pontos) ===
         if (adotante.sexoDesejado) {
-            const pontoSexo = pet.sexo === adotante.sexoDesejado ? 5 : -3
-            components.push({ value: pontoSexo, min: -3, max: 5, key: "pontoSexo" })
+            const pontoSexo = pet.sexo === adotante.sexoDesejado ? 8 : -5
+            components.push({ value: pontoSexo, min: -5, max: 8, key: "pontoSexo" })
         } else {
             components.push({ value: 0, min: 0, max: 0, key: "pontoSexo" })
         }
 
-        // === IDADE (8 pontos) ===
+        // === IDADE (12 pontos) ===
         let pontoIdade = 0
         let idadeMin = 0
-        let idadeMax = 8
+        let idadeMax = 12
 
         if (adotante.idadeMinima !== null && adotante.idadeMaxima !== null && pet.idade !== null) {
             if (pet.idade >= adotante.idadeMinima && pet.idade <= adotante.idadeMaxima) {
-                pontoIdade = 8
-            } else if (pet.idade < adotante.idadeMinima) {
-                // Muito novo - penalização menor
-                pontoIdade = -3
+                pontoIdade = 12
             } else {
-                // Muito velho - penalização maior
-                pontoIdade = -5
+                // Calcula distância da faixa desejada para penalização proporcional
+                const distancia = pet.idade < adotante.idadeMinima 
+                    ? adotante.idadeMinima - pet.idade 
+                    : pet.idade - adotante.idadeMaxima
+                // Penalização maior quanto mais distante
+                pontoIdade = -Math.min(15, distancia * 3)
             }
         } else if (adotante.idadeMinima !== null && pet.idade !== null) {
             // Só tem mínimo
             if (pet.idade >= adotante.idadeMinima) {
-                pontoIdade = 5
+                pontoIdade = 8
             } else {
-                pontoIdade = -3
+                const distancia = adotante.idadeMinima - pet.idade
+                pontoIdade = -Math.min(10, distancia * 2)
             }
         } else if (adotante.idadeMaxima !== null && pet.idade !== null) {
             // Só tem máximo
             if (pet.idade <= adotante.idadeMaxima) {
-                pontoIdade = 5
+                pontoIdade = 8
             } else {
-                pontoIdade = -5
+                const distancia = pet.idade - adotante.idadeMaxima
+                pontoIdade = -Math.min(15, distancia * 3)
             }
         } else {
             // Sem preferência de idade
@@ -99,30 +102,35 @@ class CompatibilidadeService {
 
         components.push({ value: pontoIdade, min: idadeMin, max: idadeMax, key: "pontoIdade" })
 
-        // === PESO (8 pontos) ===
+        // === PESO (12 pontos) ===
         let pontoPeso = 0
         let pesoMin = 0
-        let pesoMax = 8
+        let pesoMax = 12
 
         if (adotante.pesoMinimo !== null && adotante.pesoMaximo !== null && pet.peso !== null) {
             if (pet.peso >= adotante.pesoMinimo && pet.peso <= adotante.pesoMaximo) {
-                pontoPeso = 8
-            } else if (pet.peso < adotante.pesoMinimo) {
-                pontoPeso = -3
+                pontoPeso = 12
             } else {
-                pontoPeso = -5
+                // Calcula distância da faixa desejada para penalização proporcional
+                const distancia = pet.peso < adotante.pesoMinimo 
+                    ? adotante.pesoMinimo - pet.peso 
+                    : pet.peso - adotante.pesoMaximo
+                // Penalização maior quanto mais distante (peso em kg)
+                pontoPeso = -Math.min(15, Math.round(distancia * 2))
             }
         } else if (adotante.pesoMinimo !== null && pet.peso !== null) {
             if (pet.peso >= adotante.pesoMinimo) {
-                pontoPeso = 5
+                pontoPeso = 8
             } else {
-                pontoPeso = -3
+                const distancia = adotante.pesoMinimo - pet.peso
+                pontoPeso = -Math.min(10, Math.round(distancia * 2))
             }
         } else if (adotante.pesoMaximo !== null && pet.peso !== null) {
             if (pet.peso <= adotante.pesoMaximo) {
-                pontoPeso = 5
+                pontoPeso = 8
             } else {
-                pontoPeso = -5
+                const distancia = pet.peso - adotante.pesoMaximo
+                pontoPeso = -Math.min(15, Math.round(distancia * 2))
             }
         } else {
             pesoMin = 0
@@ -167,18 +175,18 @@ class CompatibilidadeService {
 
         components.push({ value: pontoSaude, min: saudeMin, max: saudeMax, key: "pontoSaude" })
 
-        // === VACINAÇÃO (5 pontos) ===
+        // === VACINAÇÃO (10 pontos) ===
         let pontoVacinacao = 0
         let vacinacaoMin = 0
-        let vacinacaoMax = 5
+        let vacinacaoMax = 10
 
         if (adotante.preferVacinado !== null && adotante.preferVacinado !== undefined) {
             if (adotante.preferVacinado) {
-                // Prefere vacinado
+                // Prefere vacinado - critério importante
                 if (pet.vacinado) {
-                    pontoVacinacao = 5
+                    pontoVacinacao = 10
                 } else {
-                    pontoVacinacao = -5
+                    pontoVacinacao = -12 // Penalização maior se prefere mas não está
                 }
             } else {
                 // Não se importa com vacinação
@@ -192,18 +200,18 @@ class CompatibilidadeService {
 
         components.push({ value: pontoVacinacao, min: vacinacaoMin, max: vacinacaoMax, key: "pontoVacinacao" })
 
-        // === CASTRAÇÃO (5 pontos) ===
+        // === CASTRAÇÃO (10 pontos) ===
         let pontoCastracao = 0
         let castracaoMin = 0
-        let castracaoMax = 5
+        let castracaoMax = 10
 
         if (adotante.preferCastrado !== null && adotante.preferCastrado !== undefined) {
             if (adotante.preferCastrado) {
-                // Prefere castrado
+                // Prefere castrado - critério importante
                 if (pet.castrado) {
-                    pontoCastracao = 5
+                    pontoCastracao = 10
                 } else {
-                    pontoCastracao = -5
+                    pontoCastracao = -12 // Penalização maior se prefere mas não está
                 }
             } else {
                 castracaoMin = 0
@@ -216,10 +224,10 @@ class CompatibilidadeService {
 
         components.push({ value: pontoCastracao, min: castracaoMin, max: castracaoMax, key: "pontoCastracao" })
 
-        // === TEMPERAMENTO (8 pontos) ===
+        // === TEMPERAMENTO (15 pontos) ===
         let pontoTemperamento = 0
         let temperamentoMin = 0
-        let temperamentoMax = 8
+        let temperamentoMax = 15
 
         if (adotante.preferTemperamento && adotante.preferTemperamento.length > 0 && pet.temperamento && pet.temperamento.length > 0) {
             // Conta quantos temperamentos do pet correspondem às preferências
@@ -229,11 +237,15 @@ class CompatibilidadeService {
                 )
             ).length
 
+            const totalPreferencias = adotante.preferTemperamento.length
+            const percentualMatch = matches / totalPreferencias
+
             if (matches > 0) {
-                // Proporcional ao número de matches
-                pontoTemperamento = Math.min(8, matches * 3)
+                // Pontuação proporcional ao percentual de match
+                pontoTemperamento = Math.round(15 * percentualMatch)
             } else {
-                pontoTemperamento = -3
+                // Nenhum match - penalização maior
+                pontoTemperamento = -10
             }
         } else {
             temperamentoMin = 0
@@ -242,26 +254,29 @@ class CompatibilidadeService {
 
         components.push({ value: pontoTemperamento, min: temperamentoMin, max: temperamentoMax, key: "pontoTemperamento" })
 
-        // === LOCALIZAÇÃO (5 pontos) ===
+        // === LOCALIZAÇÃO (10 pontos) ===
         let pontoLocalizacao = 0
         let localizacaoMin = 0
-        let localizacaoMax = 5
+        let localizacaoMax = 10
 
         if (adotante.preferLocalizacao && pet.local) {
             const preferLower = adotante.preferLocalizacao.toLowerCase()
             const petLocalLower = pet.local.toLowerCase()
 
             if (petLocalLower.includes(preferLower) || preferLower.includes(petLocalLower)) {
-                pontoLocalizacao = 5
+                // Mesma cidade - match perfeito
+                pontoLocalizacao = 10
             } else {
                 // Verifica se é o mesmo estado
                 const adotanteEstado = adotante.estado?.toLowerCase()
                 const petLocalEstado = pet.local.toLowerCase()
 
                 if (adotanteEstado && petLocalEstado.includes(adotanteEstado)) {
-                    pontoLocalizacao = 2
+                    // Mesmo estado - match parcial
+                    pontoLocalizacao = 4
                 } else {
-                    pontoLocalizacao = -2
+                    // Estado diferente - penalização
+                    pontoLocalizacao = -8
                 }
             }
         } else {
@@ -368,14 +383,36 @@ class CompatibilidadeService {
         const minPossible = components.reduce((s, c) => s + c.min, 0)
         const maxPossible = components.reduce((s, c) => s + c.max, 0)
 
+        // Conta quantos critérios foram aplicados (não zero)
+        const criteriosAplicados = components.filter(c => c.max !== 0 || c.min !== 0).length
+
         // Normaliza para 0–100 considerando apenas os critérios aplicáveis
         let compatibilidade = 0
 
         if (maxPossible === minPossible) {
+            // Se não há critérios aplicados, retorna 50 (neutro)
             compatibilidade = 50
         } else {
             const raw = ((pontuacaoTotal - minPossible) / (maxPossible - minPossible)) * 100
-            compatibilidade = Math.max(0, Math.min(100, Math.round(raw)))
+            
+            // Ajusta a compatibilidade baseado no número de critérios aplicados
+            // Quanto mais critérios, mais preciso é o cálculo
+            let ajuste = 1.0
+            if (criteriosAplicados < 3) {
+                // Poucos critérios - reduz a faixa de compatibilidade para evitar todos muito altos
+                ajuste = 0.6 // Reduz a compatibilidade máxima para 60%
+            } else if (criteriosAplicados < 5) {
+                ajuste = 0.75 // Reduz para 75%
+            } else if (criteriosAplicados >= 7) {
+                ajuste = 1.1 // Aumenta um pouco para critérios muito específicos
+            }
+            
+            compatibilidade = Math.max(0, Math.min(100, Math.round(raw * ajuste)))
+            
+            // Se a compatibilidade bruta for muito baixa (negativa), força para baixo
+            if (raw < 30 && criteriosAplicados >= 3) {
+                compatibilidade = Math.max(0, Math.round(raw * 0.8))
+            }
         }
 
         // Aplica penalização se houver fator impeditivo
@@ -431,7 +468,9 @@ class CompatibilidadeService {
     async buscarPetsCompativeis(idAdotante: number) {
         const pets = await prisma.pet.findMany({
             where: {
-                status: "DISPONIVEL",
+                status: {
+                    in: ["DISPONIVEL", "RESERVADO"], // Incluir também RESERVADO para mostrar compatibilidade
+                },
             },
             include: {
                 ong: true,

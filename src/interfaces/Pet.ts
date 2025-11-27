@@ -14,7 +14,7 @@ export interface IPetCreate {
     necessidadesEspeciais: boolean;
     tratamentoContinuo: boolean;
     doencaCronica: boolean;
-    idOng: number;
+    idOng?: number; // Opcional: tutor pode não ter ONG vinculada
     imagens?: string[];
 
     // NOVOS CAMPOS

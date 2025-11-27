@@ -6,11 +6,12 @@ const prisma = new PrismaClient()
 class PetService {
     async getAll(filter?: { status?: string }) {
         const where: any = {}
-        if (filter && filter.status) {
-            where.status = filter.status
+        // Se filter não foi passado ou status é undefined/vazio, retornar TODOS os pets
+        if (!filter || filter.status === undefined || filter.status === '') {
+            // Não adicionar filtro de status - retornar todos
         } else {
-            // Default: só pets DISPONÍVEIS
-            where.status = 'DISPONIVEL'
+            // Filtrar por status específico
+            where.status = filter.status
         }
 
         const pets = await prisma.pet.findMany({
@@ -22,6 +23,13 @@ class PetService {
                         cnpj: true,
                         nome: true,
                         endereco: true,
+                    },
+                },
+                tutorOrigem: {
+                    select: {
+                        id: true,
+                        nome: true,
+                        email: true,
                     },
                 },
                 historicoLocalizacoes: {
@@ -40,6 +48,13 @@ class PetService {
             where: { id },
             include: {
                 ong: true,
+                tutorOrigem: {
+                    select: {
+                        id: true,
+                        nome: true,
+                        email: true,
+                    },
+                },
                 historicoLocalizacoes: {
                     orderBy: {
                         dataInicio: 'desc',
@@ -61,27 +76,95 @@ class PetService {
                     ? [(petData as any).imagens]
                     : []
 
+        // Extrair valores antes de criar o objeto data
+        const tutorIdValue = (petData as any).idTutorOrigem ?? (petData as any).tutorId
+        const idOngValue = (petData as any).idOng
+
         // monta o objeto de dados com defaults e imagens garantidas
+        // Não incluir campos de relacionamento diretamente - usar sintaxe de relação do Prisma
         const data: any = {
-            ...petData,
-            dataResgate: (petData as any).dataResgate ?? new Date(),
+            nome: petData.nome,
+            especie: petData.especie,
+            raca: petData.raca,
+            porte: petData.porte,
+            sexo: petData.sexo,
+            status: (petData as any).status ?? 'DISPONIVEL',
+            dataResgate: (petData as any).dataResgate ? new Date((petData as any).dataResgate) : new Date(),
             necessidadesEspeciais: (petData as any).necessidadesEspeciais ?? false,
             tratamentoContinuo: (petData as any).tratamentoContinuo ?? false,
             doencaCronica: (petData as any).doencaCronica ?? false,
             vacinado: (petData as any).vacinado ?? false,
             castrado: (petData as any).castrado ?? false,
             imagens: imagensNormalizadas,
+            descricao: (petData as any).descricao,
+            descricaoSaude: (petData as any).descricaoSaude,
+            idade: (petData as any).idade,
+            peso: (petData as any).peso,
+            local: (petData as any).local,
+            temperamento: (petData as any).temperamento ?? [],
+            latitude: (petData as any).latitude,
+            longitude: (petData as any).longitude,
         }
 
-        // Valida ONG se idOng foi enviado
-        if ((data as any).idOng) {
-            const idOng = (data as any).idOng as number
-            const found: any = await prisma.$queryRaw`SELECT id_ong FROM ong WHERE id_ong = ${idOng}`
-            if (!found || (Array.isArray(found) && found.length === 0)) {
-                const e: any = new Error('ONG_NOT_FOUND')
-                throw e
+        // Validar e conectar tutor se fornecido
+        if (tutorIdValue !== undefined && tutorIdValue !== null) {
+            const tutorId = Number(tutorIdValue)
+            if (!isNaN(tutorId)) {
+                try {
+                    console.log(`🔍 Validando Tutor com ID: ${tutorId}`)
+                    const foundTutor = await prisma.tutor.findUnique({
+                        where: { id: tutorId },
+                        select: { id: true }
+                    })
+                    if (foundTutor) {
+                        console.log(`✅ Tutor ${tutorId} validado com sucesso`)
+                        ;(data as any).tutorOrigem = { connect: { id: tutorId } }
+                    } else {
+                        console.warn(`⚠️ Tutor com ID ${tutorId} não encontrado - criando pet sem tutor de origem`)
+                        // Não lançar erro, tutor de origem é opcional
+                    }
+                } catch (err: any) {
+                    console.warn(`⚠️ Erro ao validar tutor (ID: ${tutorId}):`, err.message)
+                    // Não lançar erro, tutor de origem é opcional
+                }
             }
         }
+
+        // Valida ONG se idOng foi enviado (opcional - tutor pode não ter ONG)
+        if (idOngValue !== undefined && idOngValue !== null) {
+            const idOng = Number(idOngValue)
+            if (isNaN(idOng)) {
+                console.warn(`⚠️ idOng inválido: ${idOngValue} - criando pet sem ONG`)
+                // Não lançar erro, apenas criar sem ONG
+            } else {
+                // Usar Prisma ORM em vez de queryRaw para melhor compatibilidade
+                try {
+                    console.log(`🔍 Validando ONG com ID: ${idOng}`)
+                    const found = await prisma.oNG.findUnique({
+                        where: { id: idOng },
+                        select: { id: true }
+                    })
+                    console.log(`🔍 Resultado da busca:`, found)
+                    if (found) {
+                        console.log(`✅ ONG ${idOng} validada com sucesso`)
+                        // Usar sintaxe de relação do Prisma
+                        ;(data as any).ong = { connect: { id: idOng } }
+                    } else {
+                        console.warn(`⚠️ ONG com ID ${idOng} não encontrada - criando pet sem ONG (opcional)`)
+                        // Não lançar erro, apenas criar sem ONG já que é opcional
+                    }
+                } catch (err: any) {
+                    console.warn(`⚠️ Erro ao validar ONG (ID: ${idOng}):`, err.message, '- criando pet sem ONG')
+                    // Não lançar erro, apenas criar sem ONG já que é opcional
+                }
+            }
+        }
+        // Se idOng não foi enviado, não é erro - tutor pode não ter ONG vinculada
+
+        // Log final do objeto data antes de criar
+        console.log('📤 Dados finais para criar pet:', JSON.stringify(data, null, 2))
+        console.log('📤 tutorOrigem no data:', (data as any).tutorOrigem)
+        console.log('📤 ong no data:', (data as any).ong)
 
         const newPet = await prisma.pet.create({
             data,
@@ -115,6 +198,8 @@ class PetService {
         if (typeof data.castrado !== 'undefined') updateData.castrado = data.castrado
         if (typeof data.temperamento !== 'undefined')
             updateData.temperamento = data.temperamento
+        if (typeof (data as any).latitude !== 'undefined') updateData.latitude = (data as any).latitude
+        if (typeof (data as any).longitude !== 'undefined') updateData.longitude = (data as any).longitude
         if (typeof data.descricao !== 'undefined')
             updateData.descricao = data.descricao
         if (typeof data.descricaoSaude !== 'undefined')
@@ -124,10 +209,16 @@ class PetService {
                 ? new Date(data.dataResgate)
                 : null
         }
-        if (typeof data.idTutorOrigem !== 'undefined')
-            updateData.idTutorOrigem = data.idTutorOrigem
-        if (typeof data.idTutorAdotante !== 'undefined')
-            updateData.idTutorAdotante = data.idTutorAdotante
+        // Mapear tutorId/adotanteId para os campos do Prisma
+        if (typeof data.tutorId !== 'undefined')
+            updateData.tutorId = data.tutorId
+        else if (typeof (data as any).idTutorOrigem !== 'undefined')
+            updateData.tutorId = (data as any).idTutorOrigem
+        
+        if (typeof data.adotanteId !== 'undefined')
+            updateData.adotanteId = data.adotanteId
+        else if (typeof (data as any).idTutorAdotante !== 'undefined')
+            updateData.adotanteId = (data as any).idTutorAdotante
         if (typeof data.idOng !== 'undefined') updateData.idOng = data.idOng
 
         // Imagens: substitui o array inteiro

@@ -50,8 +50,9 @@ export const validatePetData = (data: any): ValidationError[] => {
     errors.push({ field: "sexo", message: "Sexo deve ser MACHO ou FEMEA" })
   }
 
-  if (!data.idOng || isNaN(Number.parseInt(data.idOng))) {
-    errors.push({ field: "idOng", message: "ID da ONG é obrigatório e deve ser um número" })
+  // idOng é opcional, mas se fornecido, deve ser um número válido
+  if (data.idOng !== undefined && data.idOng !== null && isNaN(Number.parseInt(data.idOng))) {
+    errors.push({ field: "idOng", message: "ID da ONG deve ser um número válido (opcional)" })
   }
 
   if (typeof data.necessidadesEspeciais !== "boolean") {
@@ -100,8 +101,9 @@ export const validateTutorData = (data: any): ValidationError[] => {
     errors.push({ field: "cep", message: "CEP inválido (formato: XXXXX-XXX ou XXXXXXXX)" })
   }
 
-  if (!data.idOng || isNaN(Number.parseInt(data.idOng))) {
-    errors.push({ field: "idOng", message: "ID da ONG é obrigatório e deve ser um número" })
+  // idOng é opcional, mas se fornecido, deve ser um número válido
+  if (data.idOng !== undefined && data.idOng !== null && isNaN(Number.parseInt(data.idOng))) {
+    errors.push({ field: "idOng", message: "ID da ONG deve ser um número válido (opcional)" })
   }
 
   return errors

@@ -86,6 +86,8 @@ model Pet {
   vacinado     Boolean  @default(false)
   castrado     Boolean  @default(false)
   temperamento String[] @default([])
+  latitude     Float?   // Latitude para localização no mapa
+  longitude    Float?   // Longitude para localização no mapa
 
   tutorId Int?   @map("id_tutor_origem")
   tutorOrigem   Tutor? @relation("PetsOrigem", fields: [tutorId], references: [id])
@@ -93,8 +95,11 @@ model Pet {
   adotanteId Int?   @map("id_tutor_adotante")
   tutorAdotante   Tutor? @relation("PetsAdotados", fields: [adotanteId], references: [id])
 
-  idOng Int @map("id_ong")
-  ong   ONG @relation(fields: [idOng], references: [id])
+  idAdotante Int? @map("id_adotante")
+  adotante   Adotante? @relation(fields: [idAdotante], references: [id])
+
+  idOng Int? @map("id_ong")
+  ong   ONG? @relation(fields: [idOng], references: [id])
 
   historicoLocalizacoes HistoricoLocalizacao[]
   visitasAcompanhamento VisitaAcompanhamento[]
@@ -177,6 +182,7 @@ model Adotante {
 
   relatorios       RelatorioCompatibilidade[]
   adoptionRequests AdoptionRequest[]
+  petsAdotados    Pet[]
 
   @@map("adotante")
 }

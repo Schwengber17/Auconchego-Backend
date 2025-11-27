@@ -6,8 +6,10 @@ import { ENUM_STATUS_ADOCAO, ENUM_STATUS } from '../utils/constants.js'
 class PetController {
     async list(req: Request, res: Response) {
         try {
-            const status = (req.query.status as string) || undefined
-            const pets = await PetService.getAll(status ? { status } : undefined);
+            const statusParam = req.query.status as string | undefined
+            // Se status for string vazia ou undefined, passar undefined para retornar todos os pets
+            const filter = (statusParam && statusParam !== '') ? { status: statusParam } : undefined
+            const pets = await PetService.getAll(filter);
             return res.status(200).json(pets);
         } catch (error) {
             console.error(error);
@@ -36,13 +38,18 @@ class PetController {
             const newPet = await PetService.create(req.body);
             return res.status(201).json(newPet);
         } catch (error) {
-            console.error(error);
+            console.error('❌ Erro ao criar pet:', error);
             // Distinguish missing ONG (foreign key) to give clearer message
             if ((error as any).message === 'ONG_NOT_FOUND') {
-                return res.status(400).json({ error: 'ONG not found. Please provide a valid idOng.' });
+                return res.status(400).json({ 
+                    error: 'ONG not found. Please provide a valid idOng or leave it empty if the tutor has no ONG associated.' 
+                });
             }
             // Pode ser outro erro de FK ou validação
-            return res.status(400).json({ error: 'Failed to create pet. Check your input data.' });
+            return res.status(400).json({ 
+                error: 'Failed to create pet. Check your input data.',
+                details: (error as any).message 
+            });
         }
     }
 

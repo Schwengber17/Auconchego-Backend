@@ -6,10 +6,13 @@ async function main() {
   console.log("Iniciando seed do banco de dados...")
 
   // Limpar dados existentes
+  // IMPORTANTE: Ordem de deleção deve respeitar as constraints de chave estrangeira
+  // Deletar primeiro as tabelas que referenciam outras (filhas), depois as tabelas referenciadas (pais)
   console.log("Limpando dados existentes...")
   await prisma.relatorioCompatibilidade.deleteMany()
   await prisma.visitaAcompanhamento.deleteMany()
   await prisma.historicoLocalizacao.deleteMany()
+  await prisma.adoptionRequest.deleteMany() // Deletar antes de adotante (tem FK para adotante)
   await prisma.adotante.deleteMany()
   await prisma.tutor.deleteMany()
   await prisma.pet.deleteMany()
@@ -80,6 +83,19 @@ async function main() {
 
   // URLs base para as imagens
   const baseUrl = "http://localhost:3333/public/pets"
+
+  // Função auxiliar para obter coordenadas baseado na localização
+  const getCoordenadas = (local: string) => {
+    if (local.includes("Porto Alegre")) {
+      return { latitude: -30.0346, longitude: -51.2177 }
+    } else if (local.includes("Novo Hamburgo")) {
+      return { latitude: -29.6903, longitude: -51.1303 }
+    } else if (local.includes("Canoas")) {
+      return { latitude: -29.9178, longitude: -51.1836 }
+    }
+    // Default para Porto Alegre
+    return { latitude: -30.0346, longitude: -51.2177 }
+  }
 
   // Criar Pets - Cachorros
   console.log("Criando pets disponíveis...")
@@ -526,8 +542,12 @@ async function main() {
         castrado: petData.castrado ?? false,
         temperamento: petData.temperamento ?? [],
         local: petData.local ?? null,
-        idOng: petData.idOng,
-        idTutorOrigem: petData.idTutorOrigem,
+        // Coordenadas baseadas na localização
+        ...(petData.local ? getCoordenadas(petData.local) : {}),
+        // Usar sintaxe de relação do Prisma
+        ...(petData.idTutorOrigem ? { tutorOrigem: { connect: { id: petData.idTutorOrigem } } } : {}),
+        // idOng é opcional - usar connect se existir
+        ...(petData.idOng ? { ong: { connect: { id: petData.idOng } } } : {}),
         imagens: [imagemUrl],
       } as any,
     })
